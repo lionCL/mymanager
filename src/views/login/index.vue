@@ -5,7 +5,13 @@
              ref="formData"
              :model="formData"
              class="login-form"
-             :rules="rules">
+             :rules="rules"
+             status-icon>
+      <!-- 标题 -->
+      <div class="title">
+        <h2>后台管理中心</h2>
+      </div>
+      <!-- form表单 -->
       <el-form-item label="用户名"
                     prop="username">
         <el-input v-model="formData.username"></el-input>
@@ -83,6 +89,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .title {
+    text-align: center;
+    font-size: 16px;
+  }
 
   .login-form {
     background-color: #fff;
