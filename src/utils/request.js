@@ -9,7 +9,7 @@ const instance = axios.create({
 instance.interceptors.response.use(
   response => {
     //对响应的内容进行过滤只显示data数据
-    return response.data.data || response.data
+    return response.data
   },
   error => {
     return Promise.reject(error)

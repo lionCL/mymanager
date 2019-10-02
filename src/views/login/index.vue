@@ -55,11 +55,15 @@ export default {
           try {
             let res = await userLogin(this.formData)
             // console.log(res)
-            this.$message.success('登录成功')
-            //将token记录到本地存储中
-            window.localStorage.setItem('token', res.token)
-            //跳转路由(用name名写法)
-            this.$router.push('/home')
+            if (res.meta.status === 200) {
+              this.$message.success('登录成功')
+              //将token记录到本地存储中
+              window.localStorage.setItem('token', res.data.token)
+              //跳转路由(用name名写法)
+              this.$router.push('/home')
+            } else {
+              this.$message.error(res.meta.msg)
+            }
           } catch (error) {
             this.$message.error(error.message)
           }
