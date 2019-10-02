@@ -1,5 +1,5 @@
 <template>
-  <router-view></router-view>
+  <div>我是登录页面</div>
 </template>
 
 <script>
@@ -7,5 +7,4 @@ export default {}
 </script>
 
 <style>
-@import './assets/css/base.less';
 </style>
