@@ -17,19 +17,73 @@
         </el-col>
       </el-row>
     </el-header>
+
     <el-container>
       <!-- 侧栏 -->
       <el-aside class="aside"
-                width="200px">Aside</el-aside>
+                width="200px">
+        <el-menu default-active="1"
+                 class="menu"
+                 :unique-opened="true"
+                 :router="true">
+          <!-- 一级目录-->
+          <el-submenu v-for="(item,index) in menus"
+                      :key="item.id"
+                      :index="index + ''">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span slot="title">{{item.authName}}</span>
+            </template>
+
+            <!-- 二级目录 -->
+            <el-menu-item v-for="subItem in item.children"
+                          :key="subItem.id"
+                          :index="'/'+ subItem.path">
+              <i class="el-icon-menu"></i>
+              <span>{{subItem.authName}}</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-aside>
+
       <!-- main -->
       <el-main class="main">Main</el-main>
+
     </el-container>
   </el-container>
 </template>
 
 <script>
+//导入api
+import { getMenus } from '@/api/user.js'
+
 export default {
-  name: 'home'
+  name: 'home',
+  data() {
+    return {
+      menus: []
+    }
+  },
+  mounted() {
+    //dom加载完毕后运行方法
+    this.loadMenus()
+  },
+  methods: {
+    //加载权限菜单的
+    async loadMenus() {
+      try {
+        let res = await getMenus()
+        if (res.meta.status === 200) {
+          this.menus = res.data
+          // console.log(this.menus)
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    }
+  }
 }
 </script>
 <style lang="less" scoped>
@@ -58,6 +112,10 @@ export default {
   }
   .aside {
     background-color: #d3dce6;
+    .menu {
+      width: 200px;
+      height: 100%;
+    }
   }
   .main {
     background-color: #e9eef3;

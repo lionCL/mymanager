@@ -13,5 +13,12 @@ function userLogin({ username, password }) {
   })
 }
 
+//获取用户左侧菜单权限的列表
+function getMenus() {
+  return request({
+    url: 'menus',
+    method: 'get'
+  })
+}
 //暴露pai
-export { userLogin }
+export { userLogin, getMenus }
