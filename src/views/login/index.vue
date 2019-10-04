@@ -31,7 +31,7 @@
 <script>
 //导入登录请求api
 import { userLogin } from '@/api/user'
-import { async } from 'q'
+
 export default {
   name: 'login',
   data() {
