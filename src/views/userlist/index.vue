@@ -17,7 +17,8 @@
       </el-col>
       <el-col :span="18">
         <el-button type="success"
-                   plain>添加用户</el-button>
+                   plain
+                   @click="addUserDialogVisible=true">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -40,7 +41,7 @@
       </el-table-column>
       <el-table-column label="创建日期">
         <template slot-scope="scope">
-          {{scope.row.create_time | fmtDate('YYYY-MM-DD')}}
+          {{scope.row.create_time*1000 | fmtDate('YYYY-MM-DD')}}
         </template>
       </el-table-column>
       <!-- 自定义列 -->
@@ -82,6 +83,49 @@
                    layout="total, sizes, prev, pager, next, jumper"
                    :total="total">
     </el-pagination>
+
+    <!-- 添加用户 -->
+    <el-dialog title="添加用户"
+               :visible.sync="addUserDialogVisible">
+      <!-- form表单区域 -->
+      <el-form :model="addForm"
+               :rules="rules"
+               ref="addForm">
+        <el-form-item label="用户名"
+                      prop="username"
+                      label-width="120px">
+          <el-input v-model="addForm.username"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码"
+                      label-width="120px"
+                      prop="password">
+          <el-input v-model="addForm.password"
+                    autocomplete="off"
+                    show-password></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱"
+                      label-width="120px"
+                      prop='email'>
+          <el-input v-model="addForm.email"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="电话"
+                      label-width="120px"
+                      prop="mobile">
+          <el-input v-model="addForm.mobile"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="addUserDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="submitData('addForm')">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -89,8 +133,7 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入获取用户api
-import { getUsers, delUser } from '@/api/user.js'
-import { async } from 'q'
+import { getUsers, delUser, addUser } from '@/api/user.js'
 
 export default {
   name: 'users',
@@ -119,16 +162,45 @@ export default {
           mobile: '上海市普陀区金沙江路 1516 弄'
         }
       ],
+      //表格总数据
+      total: 0,
+      //表格加载动画
+      loading: false,
       //查询参数对象
       searchParams: {
         query: '',
         pagenum: 1,
         pagesize: 10
       },
-      //表格总数据
-      total: 0,
-      //表格加载动画
-      loading: false
+
+      //添加用户弹框是否显示
+      addUserDialogVisible: false,
+      //添加用户form表格数据
+      addForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      //表单验证规则:
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 11, message: '长度在 6 到 11 个字符', trigger: 'change' }
+        ],
+        email: [
+          { required: false, message: '请输入邮箱地址', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+        ],
+        mobile: [
+          { required: false, message: '请输入手机号码', trigger: 'blur' },
+          { min: 11, max: 11, message: '长度11个字符', trigger: 'change' }
+        ]
+      }
     }
   },
   methods: {
@@ -175,11 +247,9 @@ export default {
         type: 'warning'
       })
         .then(async () => {
-          console.log(id)
-
+          // console.log(id)
           let res = await delUser(id)
-
-          console.log(res)
+          // console.log(res)
           if (res.meta.status === 200) {
             this.searchParams.pagenum = 1
             this.loadUser()
@@ -187,10 +257,6 @@ export default {
           } else {
             this.$message.error(res.meta.msg)
           }
-          // this.$message({
-          //   type: 'success',
-          //   message: '删除成功!'
-          // })
         })
         .catch(() => {
           this.$message({
@@ -198,6 +264,34 @@ export default {
             message: '已取消删除'
           })
         })
+    },
+    //新增用户
+    submitData(formName) {
+      this.$refs[formName].validate(async valid => {
+        if (valid) {
+          try {
+            let res = await addUser(this.addForm)
+            console.log(res)
+            if (res.meta.status === 201) {
+              this.addUserDialogVisible = false
+              // 清空表单数据
+              for (const key in this.addForm) {
+                this.addForm[key] = ''
+              }
+              //提示信息
+              this.$message.success('创建用户成功')
+              //重新加载数据
+              this.loadUser()
+            } else {
+              this.$message.error(res.meta.msg)
+            }
+          } catch (error) {
+            this.$message.error(error.message)
+          }
+        } else {
+          return false
+        }
+      })
     }
   },
   mounted() {

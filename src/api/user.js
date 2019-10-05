@@ -45,5 +45,19 @@ function delUser(id) {
   })
 }
 
+//新增用户
+function addUser({ username, password, email, mobile }) {
+  return request({
+    url: 'users',
+    method: 'post',
+    data: {
+      username,
+      password,
+      email: '' || email,
+      mobile: '' || mobile
+    }
+  })
+}
+
 //暴露pai
-export { userLogin, getMenus, getUsers, delUser }
+export { userLogin, getMenus, getUsers, delUser, addUser }
