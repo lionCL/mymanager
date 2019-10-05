@@ -13,7 +13,8 @@
         </el-col>
         <el-col :span="4">
           <a href="#"
-             class="loginout">退出</a>
+             class="loginout"
+             @click.prevent="loginout">退出</a>
         </el-col>
       </el-row>
     </el-header>
@@ -47,7 +48,9 @@
       </el-aside>
 
       <!-- main -->
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view></router-view>
+      </el-main>
 
     </el-container>
   </el-container>
@@ -82,6 +85,23 @@ export default {
       } catch (error) {
         this.$message.error(error.message)
       }
+    },
+    //退出
+    loginout() {
+      this.$confirm('是否退出系统?', '退出提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      })
+        .then(() => {
+          //删除token
+          window.localStorage.removeItem('token')
+          //跳转到登录界面
+          this.$router.push('/login')
+          //提示信息
+          this.$message.success('退出成功')
+        })
+        .catch(() => {})
     }
   }
 }
