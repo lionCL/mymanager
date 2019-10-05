@@ -11,7 +11,8 @@
                   v-model.trim="searchParams.query"
                   class="input-with-select">
           <el-button slot="append"
-                     icon="el-icon-search"></el-button>
+                     icon="el-icon-search"
+                     @click="handleSearch"></el-button>
         </el-input>
       </el-col>
       <el-col :span="18">
@@ -63,7 +64,8 @@
           <el-button type="danger"
                      icon="el-icon-delete"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="handelDelte(scope.row.id)"></el-button>
           <el-button type="warning"
                      icon="el-icon-check"
                      plain
@@ -87,7 +89,8 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入获取用户api
-import { getUsers } from '@/api/user.js'
+import { getUsers, delUser } from '@/api/user.js'
+import { async } from 'q'
 
 export default {
   name: 'users',
@@ -159,6 +162,42 @@ export default {
       this.searchParams.pagenum = 1
       //重新获取数据
       this.loadUser()
+    },
+    //搜索功能
+    handleSearch() {
+      this.loadUser()
+    },
+    //删除用户
+    handelDelte(id) {
+      this.$confirm('用否确认删除用户', '用户删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          console.log(id)
+
+          let res = await delUser(id)
+
+          console.log(res)
+          if (res.meta.status === 200) {
+            this.searchParams.pagenum = 1
+            this.loadUser()
+            this.$message.success('删除成功')
+          } else {
+            this.$message.error(res.meta.msg)
+          }
+          // this.$message({
+          //   type: 'success',
+          //   message: '删除成功!'
+          // })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   },
   mounted() {

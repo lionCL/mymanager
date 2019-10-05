@@ -34,5 +34,16 @@ function getUsers({ query, pagenum, pagesize }) {
   })
 }
 
+//删除用户
+function delUser(id) {
+  return request({
+    url: 'users/',
+    method: 'delete',
+    params: {
+      id
+    }
+  })
+}
+
 //暴露pai
-export { userLogin, getMenus, getUsers }
+export { userLogin, getMenus, getUsers, delUser }
