@@ -21,21 +21,26 @@
     </el-row>
     <!-- 表格 -->
     <el-table :data="tableData"
-              @current-change="handleCurrentChange"
               style="width: 100%"
-              border>
+              border
+              v-loading='loading'>
       <el-table-column type="index"
                        width="50">
       </el-table-column>
       <el-table-column property="username"
                        label="姓名"
-                       width="120">
+                       width="100">
       </el-table-column>
       <el-table-column property="email"
                        label="邮箱">
       </el-table-column>
       <el-table-column property="mobile"
                        label="电话">
+      </el-table-column>
+      <el-table-column label="创建日期">
+        <template slot-scope="scope">
+          {{scope.row.create_time | fmtDate('YYYY-MM-DD')}}
+        </template>
       </el-table-column>
       <!-- 自定义列 -->
       <el-table-column label="用户状态"
@@ -119,18 +124,21 @@ export default {
       },
       //表格总数据
       total: 0,
-      value: true
+      //表格加载动画
+      loading: false
     }
   },
   methods: {
     //获取用户数据方法
     async loadUser() {
+      this.loading = true
       try {
         let res = await getUsers(this.searchParams)
         console.log(res)
         if (res.meta.status === 200) {
           this.tableData = res.data.users
           this.total = res.data.total
+          this.loading = false
         } else {
           this.$message.error(res.meta.msg)
         }
@@ -141,6 +149,7 @@ export default {
     //页码改变事件
     handleSizeChange(page) {
       this.searchParams.pagenum = page
+      this.loadUser()
     },
     //页容量改变事件
     handleCurrentChange(size) {
