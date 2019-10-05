@@ -8,7 +8,7 @@
       <el-col :span="6"
               class="">
         <el-input placeholder="请输入内容"
-                  v-model="input3"
+                  v-model.trim="searchParams.query"
                   class="input-with-select">
           <el-button slot="append"
                      icon="el-icon-search"></el-button>
@@ -42,7 +42,7 @@
                        width="100">
 
         <template slot-scope="scope">
-          <el-switch v-model="value"
+          <el-switch v-model="scope.row.mg_state"
                      active-color="#13ce66"
                      inactive-color="#ff4949">
           </el-switch>
@@ -69,11 +69,11 @@
     <!-- 分页 -->
     <el-pagination @size-change="handleSizeChange"
                    @current-change="handleCurrentChange"
-                   :current-page="currentPage4"
-                   :page-sizes="[100, 200, 300, 400]"
-                   :page-size="100"
+                   :current-page="searchParams.pagenum"
+                   :page-sizes="[5, 10, 15, 20]"
+                   :page-size="searchParams.pagesize"
                    layout="total, sizes, prev, pager, next, jumper"
-                   :total="400">
+                   :total="total">
     </el-pagination>
   </div>
 </template>
@@ -81,6 +81,8 @@
 <script>
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
+//导入获取用户api
+import { getUsers } from '@/api/user.js'
 
 export default {
   name: 'users',
@@ -108,8 +110,50 @@ export default {
           username: '王小虎',
           mobile: '上海市普陀区金沙江路 1516 弄'
         }
-      ]
+      ],
+      //查询参数对象
+      searchParams: {
+        query: '',
+        pagenum: 1,
+        pagesize: 10
+      },
+      //表格总数据
+      total: 0,
+      value: true
     }
+  },
+  methods: {
+    //获取用户数据方法
+    async loadUser() {
+      try {
+        let res = await getUsers(this.searchParams)
+        console.log(res)
+        if (res.meta.status === 200) {
+          this.tableData = res.data.users
+          this.total = res.data.total
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    //页码改变事件
+    handleSizeChange(page) {
+      this.searchParams.pagenum = page
+    },
+    //页容量改变事件
+    handleCurrentChange(size) {
+      //改变页容量
+      this.searchParams.pagesize = size
+      //数据从第一页开始重新显示
+      this.searchParams.pagenum = 1
+      //重新获取数据
+      this.loadUser()
+    }
+  },
+  mounted() {
+    this.loadUser()
   },
   components: {
     bread

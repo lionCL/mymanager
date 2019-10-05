@@ -20,5 +20,19 @@ function getMenus() {
     method: 'get'
   })
 }
+
+//用户列表数据
+function getUsers({ query, pagenum, pagesize }) {
+  return request({
+    url: 'users',
+    method: 'get',
+    params: {
+      query,
+      pagenum,
+      pagesize
+    }
+  })
+}
+
 //暴露pai
-export { userLogin, getMenus }
+export { userLogin, getMenus, getUsers }
