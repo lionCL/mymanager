@@ -140,6 +140,7 @@ export default {
   .main {
     background-color: #e9eef3;
     height: 100%;
+    padding: 0 20px;
   }
 }
 </style>
