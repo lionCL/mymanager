@@ -37,11 +37,8 @@ function getUsers({ query, pagenum, pagesize }) {
 //删除用户
 function delUser(id) {
   return request({
-    url: 'users/',
-    method: 'delete',
-    params: {
-      id
-    }
+    url: `users/${id}`,
+    method: 'delete'
   })
 }
 

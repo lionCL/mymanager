@@ -209,7 +209,7 @@ export default {
       this.loading = true
       try {
         let res = await getUsers(this.searchParams)
-        console.log(res)
+        // console.log(res)
         if (res.meta.status === 200) {
           this.tableData = res.data.users
           this.total = res.data.total
@@ -247,9 +247,9 @@ export default {
         type: 'warning'
       })
         .then(async () => {
-          // console.log(id)
+          console.log(id)
           let res = await delUser(id)
-          // console.log(res)
+          console.log(res)
           if (res.meta.status === 200) {
             this.searchParams.pagenum = 1
             this.loadUser()
