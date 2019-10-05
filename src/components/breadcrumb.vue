@@ -2,13 +2,17 @@
   <el-breadcrumb separator-class="el-icon-arrow-right"
                  class="my-bread">
     <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-    <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-    <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+    <el-breadcrumb-item>{{first}}</el-breadcrumb-item>
+    <el-breadcrumb-item>{{second}}</el-breadcrumb-item>
+    <el-breadcrumb-item>{{third}}</el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script>
-export default {}
+export default {
+  //菜单由使用的父组件来决定
+  props: ['first', 'second', 'third']
+}
 </script>
 
 <style lang="less" scoped>

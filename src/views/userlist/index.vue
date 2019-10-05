@@ -1,7 +1,8 @@
 <template>
   <div>
     <!-- 面包屑 -->
-    <bread></bread>
+    <bread first='用户管理'
+           second='用户列表'></bread>
     <!-- 输入搜索栏 -->
     <el-row>
       <el-col :span="6"
