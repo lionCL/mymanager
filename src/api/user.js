@@ -34,6 +34,14 @@ function getUsers({ query, pagenum, pagesize }) {
   })
 }
 
+//修改用户状态
+function changeStatus(uId, type) {
+  return request({
+    url: `users/${uId}/state/${type}`,
+    method: 'put'
+  })
+}
+
 //删除用户
 function delUser(id) {
   return request({
@@ -77,4 +85,13 @@ function updateUserInfo({ id, email, mobile }) {
 }
 
 //暴露pai
-export { userLogin, getMenus, getUsers, delUser, addUser, getUserInfo, updateUserInfo }
+export {
+  userLogin,
+  getMenus,
+  getUsers,
+  changeStatus,
+  delUser,
+  addUser,
+  getUserInfo,
+  updateUserInfo
+}

@@ -51,7 +51,8 @@
         <template slot-scope="scope">
           <el-switch v-model="scope.row.mg_state"
                      active-color="#13ce66"
-                     inactive-color="#ff4949">
+                     inactive-color="#ff4949"
+                     @change="changeState(scope.row)">
           </el-switch>
         </template>
       </el-table-column>
@@ -139,12 +140,6 @@
                     autocomplete="off"
                     disabled></el-input>
         </el-form-item>
-        <!-- <el-form-item label="密码"
-                      label-width="120px">
-          <el-input v-model="addForm.password"
-                    autocomplete="off"
-                    show-password></el-input>
-        </el-form-item> -->
         <el-form-item label="邮箱"
                       label-width="120px">
           <el-input v-model="editForm.email"
@@ -164,6 +159,7 @@
                    @click="submitEditData">确 定</el-button>
       </span>
     </el-dialog>
+
   </div>
 </template>
 
@@ -171,7 +167,14 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入获取用户api
-import { getUsers, delUser, addUser, getUserInfo, updateUserInfo } from '@/api/user.js'
+import {
+  getUsers,
+  delUser,
+  addUser,
+  getUserInfo,
+  updateUserInfo,
+  changeStatus
+} from '@/api/user.js'
 
 export default {
   name: 'users',
@@ -239,7 +242,6 @@ export default {
           { min: 11, max: 11, message: '长度11个字符', trigger: 'change' }
         ]
       },
-
       //编辑用户弹窗是否显示
       editUserDialogVisible: false,
       //编辑用户form表格数据
@@ -286,6 +288,15 @@ export default {
     //搜索功能
     handleSearch() {
       this.loadUser()
+    },
+    //用户状态
+    async changeState(row) {
+      let res = await changeStatus(row.id, row.mg_state)
+      if (res.meta.status === 200) {
+        this.$message.success('修改状态成功')
+      } else {
+        this.$message.error(res.meta.msg)
+      }
     },
     //删除用户
     handelDelte(id) {
@@ -353,7 +364,7 @@ export default {
     async submitEditData() {
       try {
         let res = await updateUserInfo(this.editForm)
-        console.log(res)
+        // console.log(res)
         if (res.meta.status === 200) {
           //关闭窗口
           this.editUserDialogVisible = false
