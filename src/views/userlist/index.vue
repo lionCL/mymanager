@@ -72,7 +72,8 @@
           <el-button type="warning"
                      icon="el-icon-check"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="showRole(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -159,7 +160,34 @@
                    @click="submitEditData">确 定</el-button>
       </span>
     </el-dialog>
-
+    <!-- 角色分配 -->
+    <el-dialog title="用户角色分配"
+               :visible.sync="setRoleDialogFormVisible"
+               width="40%">
+      <el-form :model="roleForm"
+               label-width="150px"
+               label-position="right">
+        <el-form-item label="当前用户">
+          <span>{{roleForm.username}}</span>
+        </el-form-item>
+        <el-form-item label="请选择角色">
+          <el-select v-model="roleForm.rid"
+                     placeholder="请选择角色">
+            <el-option v-for="item in roles"
+                       :key="item.id"
+                       :value="item.id"
+                       :label="item.roleName">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="setRoleDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="doUserRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -173,7 +201,9 @@ import {
   addUser,
   getUserInfo,
   updateUserInfo,
-  changeStatus
+  changeStatus,
+  getUserRole,
+  assignRole
 } from '@/api/user.js'
 
 export default {
@@ -181,28 +211,7 @@ export default {
   data() {
     return {
       //表格数据
-      tableData: [
-        {
-          email: '2016-05-02',
-          username: '王小虎',
-          mobile: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          email: '2016-05-04',
-          username: '王小虎',
-          mobile: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          email: '2016-05-01',
-          username: '王小虎',
-          mobile: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          email: '2016-05-03',
-          username: '王小虎',
-          mobile: '上海市普陀区金沙江路 1516 弄'
-        }
-      ],
+      tableData: [],
       //表格总数据
       total: 0,
       //表格加载动画
@@ -210,8 +219,10 @@ export default {
       //查询参数对象
       searchParams: {
         query: '',
+        //当前页码
         pagenum: 1,
-        pagesize: 10
+        //页容量
+        pagesize: 5
       },
 
       //添加用户弹框是否显示
@@ -223,6 +234,7 @@ export default {
         email: '',
         mobile: ''
       },
+
       //表单验证规则:
       rules: {
         username: [
@@ -250,7 +262,23 @@ export default {
         password: '',
         email: '',
         mobile: ''
-      }
+      },
+
+      //角色分配弹出是否显示
+      setRoleDialogFormVisible: false,
+      // 用户分配角色 form表格数据
+      roleForm: {
+        //用户id
+        username: '',
+        //角色id
+        rid: 0,
+        //用户名
+        roleName: '',
+        //用户id
+        id: 0
+      },
+      //所有用户角色
+      roles: []
     }
   },
   methods: {
@@ -272,12 +300,14 @@ export default {
       }
     },
     //页码改变事件
-    handleSizeChange(page) {
+    handleCurrentChange(page) {
       this.searchParams.pagenum = page
       this.loadUser()
+      // console.log(1111)
     },
     //页容量改变事件
-    handleCurrentChange(size) {
+    handleSizeChange(size) {
+      // console.log(22222)
       //改变页容量
       this.searchParams.pagesize = size
       //数据从第一页开始重新显示
@@ -324,6 +354,7 @@ export default {
           })
         })
     },
+    //编辑用户
     async handelEdit(id) {
       //弹出编辑框
       this.editUserDialogVisible = true
@@ -332,7 +363,34 @@ export default {
       this.editForm = res.data
       // console.log(this.editForm.id)
     },
-    //新增用户
+    //用户权限
+    async showRole(row) {
+      //显示弹窗
+      this.setRoleDialogFormVisible = true
+      //发送请求获取当前用户信息
+      let res = await getUserInfo(row.id)
+      this.roleForm = res.data
+      // console.log(this.roleForm)
+    },
+    //分配角色功能
+    async doUserRole() {
+      let res = await assignRole(this.roleForm.id, {
+        rid: this.roleForm.rid
+      })
+      if (res.meta.status === 200) {
+        this.setRoleDialogFormVisible = false
+        this.$message.success('角色分配成功')
+      } else {
+        this.$message.error(res.meta.msg)
+      }
+    },
+    //获取角色列表
+    async getALLRoles() {
+      let res = await getUserRole()
+      // console.log(res)
+      this.roles = res.data
+    },
+    //新增用户数据提交
     submitAddData(formName) {
       this.$refs[formName].validate(async valid => {
         if (valid) {
@@ -360,7 +418,7 @@ export default {
         }
       })
     },
-    //编辑用户
+    //编辑用户数据提交
     async submitEditData() {
       try {
         let res = await updateUserInfo(this.editForm)
@@ -381,6 +439,10 @@ export default {
   },
   mounted() {
     this.loadUser()
+  },
+  created() {
+    //发送请求获取角色列表
+    this.getALLRoles()
   },
   components: {
     bread

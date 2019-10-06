@@ -84,6 +84,33 @@ function updateUserInfo({ id, email, mobile }) {
   })
 }
 
+//用户角色列表
+function getUserRole() {
+  return request({
+    url: 'roles',
+    method: 'get'
+  })
+}
+
+//分配用户角色
+function assignRole(id, { rid }) {
+  return request({
+    url: `users/${id}/role`,
+    method: 'put',
+    data: {
+      rid
+    }
+  })
+}
+
+//根据角色id查询角色信息
+function getRoleInfo(roleId) {
+  return request({
+    url: `roles/${roleId}`,
+    method: 'get'
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -93,5 +120,8 @@ export {
   delUser,
   addUser,
   getUserInfo,
-  updateUserInfo
+  updateUserInfo,
+  getUserRole,
+  assignRole,
+  getRoleInfo
 }
