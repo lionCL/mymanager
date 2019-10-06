@@ -56,5 +56,25 @@ function addUser({ username, password, email, mobile }) {
   })
 }
 
+//根据id获取用户信息
+function getUserInfo(id) {
+  return request({
+    url: `users/${id}`,
+    method: 'get'
+  })
+}
+
+//编辑用户提交
+function updateUserInfo({ id, email, mobile }) {
+  return request({
+    url: `users/${id}`,
+    method: 'put',
+    data: {
+      email: '' || email,
+      mobile: '' || mobile
+    }
+  })
+}
+
 //暴露pai
-export { userLogin, getMenus, getUsers, delUser, addUser }
+export { userLogin, getMenus, getUsers, delUser, addUser, getUserInfo, updateUserInfo }

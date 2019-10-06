@@ -61,7 +61,8 @@
           <el-button type="primary"
                      icon="el-icon-edit"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="handelEdit(scope.row.id)"></el-button>
           <el-button type="danger"
                      icon="el-icon-delete"
                      plain
@@ -122,10 +123,47 @@
             class="dialog-footer">
         <el-button @click="addUserDialogVisible = false">取 消</el-button>
         <el-button type="primary"
-                   @click="submitData('addForm')">确 定</el-button>
+                   @click="submitAddData('addForm')">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 编辑用户 -->
+    <el-dialog title="编辑用户"
+               :visible.sync="editUserDialogVisible">
+      <!-- form表单区域 -->
+      <el-form :model="editForm"
+               :rules="rules">
+        <el-form-item label="用户名"
+                      prop="username"
+                      label-width="120px">
+          <el-input v-model="editForm.username"
+                    autocomplete="off"
+                    disabled></el-input>
+        </el-form-item>
+        <!-- <el-form-item label="密码"
+                      label-width="120px">
+          <el-input v-model="addForm.password"
+                    autocomplete="off"
+                    show-password></el-input>
+        </el-form-item> -->
+        <el-form-item label="邮箱"
+                      label-width="120px">
+          <el-input v-model="editForm.email"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="电话"
+                      label-width="120px">
+          <el-input v-model="editForm.mobile"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
 
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="editUserDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="submitEditData">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -133,7 +171,7 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入获取用户api
-import { getUsers, delUser, addUser } from '@/api/user.js'
+import { getUsers, delUser, addUser, getUserInfo, updateUserInfo } from '@/api/user.js'
 
 export default {
   name: 'users',
@@ -200,6 +238,16 @@ export default {
           { required: false, message: '请输入手机号码', trigger: 'blur' },
           { min: 11, max: 11, message: '长度11个字符', trigger: 'change' }
         ]
+      },
+
+      //编辑用户弹窗是否显示
+      editUserDialogVisible: false,
+      //编辑用户form表格数据
+      editForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
       }
     }
   },
@@ -247,9 +295,9 @@ export default {
         type: 'warning'
       })
         .then(async () => {
-          console.log(id)
+          // console.log(id)
           let res = await delUser(id)
-          console.log(res)
+          // console.log(res)
           if (res.meta.status === 200) {
             this.searchParams.pagenum = 1
             this.loadUser()
@@ -265,13 +313,21 @@ export default {
           })
         })
     },
+    async handelEdit(id) {
+      //弹出编辑框
+      this.editUserDialogVisible = true
+      let res = await getUserInfo(id)
+      // console.log(res)
+      this.editForm = res.data
+      // console.log(this.editForm.id)
+    },
     //新增用户
-    submitData(formName) {
+    submitAddData(formName) {
       this.$refs[formName].validate(async valid => {
         if (valid) {
           try {
             let res = await addUser(this.addForm)
-            console.log(res)
+            // console.log(res)
             if (res.meta.status === 201) {
               this.addUserDialogVisible = false
               // 清空表单数据
@@ -292,6 +348,24 @@ export default {
           return false
         }
       })
+    },
+    //编辑用户
+    async submitEditData() {
+      try {
+        let res = await updateUserInfo(this.editForm)
+        console.log(res)
+        if (res.meta.status === 200) {
+          //关闭窗口
+          this.editUserDialogVisible = false
+          this.$message.success(res.meta.msg)
+          //重新加载数据
+          this.loadUser()
+        } else {
+          this.$message.error(res.meta.msg)
+        }
+      } catch (error) {
+        this.$message.error(error.message)
+      }
     }
   },
   mounted() {
