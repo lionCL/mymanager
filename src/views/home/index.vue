@@ -23,7 +23,7 @@
       <!-- 侧栏 -->
       <el-aside class="aside"
                 width="200px">
-        <el-menu default-active="1"
+        <el-menu default-active="/home/users"
                  class="menu"
                  :unique-opened="true"
                  :router="true">
@@ -74,16 +74,12 @@ export default {
   methods: {
     //加载权限菜单的
     async loadMenus() {
-      try {
-        let res = await getMenus()
-        if (res.meta.status === 200) {
-          this.menus = res.data
-          // console.log(this.menus)
-        } else {
-          this.$message.error(res.meta.msg)
-        }
-      } catch (error) {
-        this.$message.error(error.message)
+      let res = await getMenus()
+      if (res.meta.status === 200) {
+        this.menus = res.data
+        // console.log(this.menus)
+      } else {
+        this.$message.error(res.meta.msg)
       }
     },
     //退出

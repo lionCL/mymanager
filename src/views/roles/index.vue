@@ -73,7 +73,8 @@
           <el-button type="warning"
                      icon="el-icon-check"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="handleShowRightsDialog(scope.row)"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -133,6 +134,28 @@
                    @click="submiteditData('editForm')">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 权限分配 -->
+    <el-dialog title="权限分配"
+               :visible.sync="roleDialogVisible"
+               width="40%">
+
+      <el-tree :data="treedata"
+               :props="defaultProps"
+               show-checkbox
+               default-expand-all
+               :default-checked-keys="[]"
+               node-key="id"
+               ref="tree"
+               v-loading="loadingTree"></el-tree>
+
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="roleDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="submitRoles">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -140,7 +163,15 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入api
-import { getUserRole, addRole, getRoleInfo, updateRoles, deleteRole } from '@/api/user.js'
+import {
+  getUserRole,
+  addRole,
+  getRoleInfo,
+  updateRoles,
+  deleteRole,
+  getAllRoles,
+  setRoles
+} from '@/api/user.js'
 
 export default {
   name: 'roles',
@@ -177,7 +208,20 @@ export default {
         roleDesc: ''
       },
       //编辑弹窗是否显示
-      editUserDialogVisible: false
+      editUserDialogVisible: false,
+
+      //权限分配弹窗
+      roleDialogVisible: false,
+      // 树形列表数据
+      treedata: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      },
+      //数据加载动画
+      loadingTree: false,
+      //保存当前被点击的前角色id
+      currentId: 0
     }
   },
   methods: {
@@ -275,11 +319,84 @@ export default {
             message: '已取消删除'
           })
         })
+    },
+    //弹出权限弹框展示树形结构
+    handleShowRightsDialog(row) {
+      // console.log(row)
+      //显示对话框
+      this.roleDialogVisible = true
+      //开启动画
+      this.loadingTree = true
+      // 把被点击的这一行的角色id存起来
+      this.currentId = row.id
+      //存放树形最后一层节点children的id数据
+      let list = []
+      // row.children.forEach(item1 => {
+      //   item1.children.forEach(item2 => {
+      //     item2.children.forEach(item3 => {
+      //       arr.push(item3.id)
+      //     })
+      //   })
+      // })
+
+      //递归来遍历树形结构  不知道层级的情况下
+      function getChildrenId(item) {
+        //如果还有子元素，继续往下遍历子元素
+        if (item.children) {
+          for (var i = 0; i < item.children.length; i++) {
+            getChildrenId(item.children[i])
+          }
+        } else {
+          //代表没有子元素了
+          list.push(item.id)
+        }
+      }
+      getChildrenId(row)
+      //下次dom更新完毕
+      this.$nextTick(() => {
+        //设置选中节点
+        this.$refs.tree.setCheckedKeys(list)
+        //关闭动画
+        this.loadingTree = false
+      })
+    },
+    //权限弹窗打开时执行函数
+    async loadAllRoles() {
+      let res = await getAllRoles('tree')
+      // console.log(res)
+      //渲染树状角色权限
+      this.treedata = res.data
+    },
+    //修改权限后,提交按钮
+    async submitRoles() {
+      //拿到所有选中的权限id
+      let keys = this.$refs.tree.getCheckedKeys()
+      //拿到半选的id
+      let halfKeys = this.$refs.tree.getHalfCheckedKeys()
+      // console.log(halfKeys)
+      //组成新的权限id列表
+      let newArr = [...keys, ...halfKeys]
+      let rids = newArr.join(',')
+      // console.log(rids)
+      // console.log(rids)
+      //发送请求
+      // console.log(this.currentId)
+      let res = await setRoles(this.currentId, rids)
+      // console.log(res)
+      if (res.meta.status === 200) {
+        this.roleDialogVisible = false
+        this.$message.success('角色权限分配成功')
+        //刷新数据
+        this.loadRoles()
+      }
     }
   },
   created() {
     this.loadRoles()
+    //弹窗规则树状规则列表
+    this.loadAllRoles()
   },
+
   components: {
     bread
   }

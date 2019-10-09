@@ -285,18 +285,14 @@ export default {
     //获取用户数据方法
     async loadUser() {
       this.loading = true
-      try {
-        let res = await getUsers(this.searchParams)
-        // console.log(res)
-        if (res.meta.status === 200) {
-          this.tableData = res.data.users
-          this.total = res.data.total
-          this.loading = false
-        } else {
-          this.$message.error(res.meta.msg)
-        }
-      } catch (error) {
-        this.$message.error(error.message)
+      let res = await getUsers(this.searchParams)
+      // console.log(res)
+      if (res.meta.status === 200) {
+        this.tableData = res.data.users
+        this.total = res.data.total
+        this.loading = false
+      } else {
+        this.$message.error(res.meta.msg)
       }
     },
     //页码改变事件
@@ -420,20 +416,16 @@ export default {
     },
     //编辑用户数据提交
     async submitEditData() {
-      try {
-        let res = await updateUserInfo(this.editForm)
-        // console.log(res)
-        if (res.meta.status === 200) {
-          //关闭窗口
-          this.editUserDialogVisible = false
-          this.$message.success(res.meta.msg)
-          //重新加载数据
-          this.loadUser()
-        } else {
-          this.$message.error(res.meta.msg)
-        }
-      } catch (error) {
-        this.$message.error(error.message)
+      let res = await updateUserInfo(this.editForm)
+      // console.log(res)
+      if (res.meta.status === 200) {
+        //关闭窗口
+        this.editUserDialogVisible = false
+        this.$message.success(res.meta.msg)
+        //重新加载数据
+        this.loadUser()
+      } else {
+        this.$message.error(res.meta.msg)
       }
     }
   },

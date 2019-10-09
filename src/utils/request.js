@@ -1,5 +1,5 @@
 import axios from 'axios'
-import Vue from 'vue'
+// import Vue from 'vue'
 import router from '@/router'
 
 //创建一个axios实例对象
@@ -10,15 +10,14 @@ const instance = axios.create({
 //设置响应拦截
 instance.interceptors.response.use(
   response => {
+    if (response.data.meta.status === 401) {
+      //跳转到登录页面
+      router.push('/login')
+    }
     //对响应的内容进行过滤只显示data数据
     return response.data
   },
   error => {
-    if (error.response.data.meta.status === 401) {
-      Vue.prototype.$message.error('token过期或无效,请重新登录')
-      //跳转到登录页面
-      router.push('/login')
-    }
     return Promise.reject(error)
   }
 )

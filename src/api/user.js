@@ -143,6 +143,30 @@ function deleteRole(rid) {
   })
 }
 
+//所有权限列表
+function getAllRoles(type) {
+  return request({
+    url: `rights/${type}`,
+    method: 'get'
+  })
+}
+
+//角色授权
+// function setRoles({ rid, rids }) {
+//   return request.post(`roles/${rid}/rights`, {
+//     rids
+//   })
+// }
+function setRoles(rid, rids) {
+  return request({
+    url: `roles/${rid}/rights`,
+    method: 'post',
+    data: {
+      rids
+    }
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -158,5 +182,7 @@ export {
   getRoleInfo,
   addRole,
   updateRoles,
-  deleteRole
+  deleteRole,
+  getAllRoles,
+  setRoles
 }
