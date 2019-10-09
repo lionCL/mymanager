@@ -68,7 +68,8 @@
           <el-button type="danger"
                      icon="el-icon-delete"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="delRole(scope.row)"></el-button>
           <el-button type="warning"
                      icon="el-icon-check"
                      plain
@@ -139,7 +140,7 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入api
-import { getUserRole, addRole, getRoleInfo, updateRoles } from '@/api/user.js'
+import { getUserRole, addRole, getRoleInfo, updateRoles, deleteRole } from '@/api/user.js'
 
 export default {
   name: 'roles',
@@ -247,6 +248,33 @@ export default {
           return false
         }
       })
+    },
+    //删除角色
+    delRole(row) {
+      this.$confirm('此操作将永久删除该角色, 是否继续?', '角色删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          let res = await deleteRole(row.id)
+          if (res.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            //重新加载角色列表
+            this.loadRoles()
+          } else {
+            this.$message.error(res.meta.msg)
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   },
   created() {

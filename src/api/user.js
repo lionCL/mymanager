@@ -135,6 +135,14 @@ function updateRoles(rid, { roleName, roleDesc }) {
   })
 }
 
+//删除角色
+function deleteRole(rid) {
+  return request({
+    url: `roles/${rid}`,
+    method: 'delete'
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -149,5 +157,6 @@ export {
   assignRole,
   getRoleInfo,
   addRole,
-  updateRoles
+  updateRoles,
+  deleteRole
 }
