@@ -63,7 +63,8 @@
           <el-button type="primary"
                      icon="el-icon-edit"
                      plain
-                     size="mini"></el-button>
+                     size="mini"
+                     @click="editRole(scope.row)"></el-button>
           <el-button type="danger"
                      icon="el-icon-delete"
                      plain
@@ -76,7 +77,7 @@
       </el-table-column>
     </el-table>
 
-    <!-- 添加角色 -->
+    <!-- 添加角色弹窗 -->
     <el-dialog title="添加用户"
                :visible.sync="addUserDialogVisible">
       <!-- form表单区域 -->
@@ -103,6 +104,34 @@
                    @click="submitAddData('addForm')">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 编辑角色弹窗 -->
+    <el-dialog title="编辑角色"
+               :visible.sync="editUserDialogVisible">
+      <!-- form表单区域 -->
+      <el-form :model="editForm"
+               :rules="rules"
+               ref="editForm">
+        <el-form-item label="角色名称"
+                      prop="roleName"
+                      label-width="120px">
+          <el-input v-model="editForm.roleName"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述"
+                      label-width="120px"
+                      prop="roleDesc">
+          <el-input v-model="editForm.roleDesc"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="editUserDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="submiteditData('editForm')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -110,7 +139,7 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入api
-import { getUserRole, addRole } from '@/api/user.js'
+import { getUserRole, addRole, getRoleInfo, updateRoles } from '@/api/user.js'
 
 export default {
   name: 'roles',
@@ -132,13 +161,22 @@ export default {
       rules: {
         roleName: [
           { required: true, message: '请输入角色名称', trigger: 'blur' },
-          { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
+          { min: 1, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
         ],
         roleDesc: [
           { required: false, message: '请输入角色描述信息', trigger: 'blur' },
           { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
         ]
-      }
+      },
+
+      //编辑角色
+      editForm: {
+        rid: '',
+        roleName: '',
+        roleDesc: ''
+      },
+      //编辑弹窗是否显示
+      editUserDialogVisible: false
     }
   },
   methods: {
@@ -164,6 +202,43 @@ export default {
             //关闭弹窗
             this.addUserDialogVisible = false
             //重新加载数据
+            this.loadRoles()
+          } else {
+            this.$message.error(res.meta.msg)
+          }
+        } else {
+          return false
+        }
+      })
+    },
+    //显示角色信息
+    async editRole(row) {
+      // console.log(row)
+      //显示弹窗
+      this.editUserDialogVisible = true
+      //发送请求获取角色信息
+      let res = await getRoleInfo(row.id)
+      // console.log(res)
+      if (res.meta.status === 200) {
+        this.editForm = res.data
+      } else {
+        this.$message.error(res.meta.msg)
+      }
+    },
+    //提交编辑角色信息
+    submiteditData(formName) {
+      this.$refs[formName].validate(async valid => {
+        if (valid) {
+          let res = await updateRoles(this.editForm.roleId, this.editForm)
+          // console.log(res)
+          if (res.meta.status === 200) {
+            //提示成功信息
+            this.$message.success('角色更新完成')
+            //关闭弹窗
+            this.editUserDialogVisible = false
+            //清空弹窗内容
+            this.editForm = {}
+            //重新加载列表数据
             this.loadRoles()
           } else {
             this.$message.error(res.meta.msg)

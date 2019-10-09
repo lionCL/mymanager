@@ -123,6 +123,18 @@ function addRole({ roleName, roleDesc }) {
   })
 }
 
+//编辑提交角色
+function updateRoles(rid, { roleName, roleDesc }) {
+  return request({
+    url: `roles/${rid}`,
+    method: 'put',
+    data: {
+      roleName,
+      roleDesc: '' || roleDesc
+    }
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -136,5 +148,6 @@ export {
   getUserRole,
   assignRole,
   getRoleInfo,
-  addRole
+  addRole,
+  updateRoles
 }
