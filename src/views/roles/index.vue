@@ -4,38 +4,48 @@
     <bread first='角色列表'
            second='权限列表'></bread>
     <!-- 添加按钮 -->
-    <el-button plain>添加角色</el-button>
+    <el-button plain
+               @click="addUserDialogVisible=true">添加角色</el-button>
     <!-- 角色列表table表格 -->
     <el-table :data="tableData"
               style="width: 100%"
-              border>
+              border
+              v-loading="loading">
+      <!-- 展开栏 -->
       <el-table-column type="expand">
-        <template slot-scope="props">
-          <el-form label-position="left"
-                   inline
-                   class="demo-table-expand">
-            <el-form-item label="商品名称">
-              <span>{{ props.row.name }}</span>
-            </el-form-item>
-            <el-form-item label="所属店铺">
-              <span>{{ props.row.shop }}</span>
-            </el-form-item>
-            <el-form-item label="商品 ID">
-              <span>{{ props.row.id }}</span>
-            </el-form-item>
-            <el-form-item label="店铺 ID">
-              <span>{{ props.row.shopId }}</span>
-            </el-form-item>
-            <el-form-item label="商品分类">
-              <span>{{ props.row.category }}</span>
-            </el-form-item>
-            <el-form-item label="店铺地址">
-              <span>{{ props.row.address }}</span>
-            </el-form-item>
-            <el-form-item label="商品描述">
-              <span>{{ props.row.desc }}</span>
-            </el-form-item>
-          </el-form>
+        <template slot-scope="scope">
+          <!-- 未设置权限的展示 -->
+          <el-row v-if="scope.row.children.length == '0'">
+            <el-col :span="24">未分配权限</el-col>
+          </el-row>
+
+          <!-- 一级权限 -->
+          <el-row v-for="item1 in scope.row.children"
+                  :key="item1.id"
+                  class="firstMenu">
+            <el-col :span="4">
+              <el-tag closable>{{item1.authName}}</el-tag>
+              <i class="el-icon-arrow-right"></i>
+            </el-col>
+            <!-- 二级权限 -->
+            <el-col :span="20">
+              <el-row v-for="item2 in item1.children"
+                      :key="item2.id"
+                      class="secondMenu">
+                <el-col :span="4">
+                  <el-tag closable>{{item2.authName}}</el-tag>
+                  <i class="el-icon-arrow-right"></i>
+                </el-col>
+                <!-- 三级权限 -->
+                <el-col :span="20">
+                  <el-tag closable
+                          v-for="item3 in item2.children"
+                          :key="item3.id"
+                          class="thirdMenu">{{item3.authName}}</el-tag>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
         </template>
       </el-table-column>
       <!-- 标题栏 -->
@@ -65,6 +75,34 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 添加角色 -->
+    <el-dialog title="添加用户"
+               :visible.sync="addUserDialogVisible">
+      <!-- form表单区域 -->
+      <el-form :model="addForm"
+               :rules="rules"
+               ref="addForm">
+        <el-form-item label="角色名称"
+                      prop="roleName"
+                      label-width="120px">
+          <el-input v-model="addForm.roleName"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述"
+                      label-width="120px"
+                      prop="roleDesc">
+          <el-input v-model="addForm.roleDesc"
+                    autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer"
+            class="dialog-footer">
+        <el-button @click="addUserDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="submitAddData('addForm')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -72,36 +110,68 @@
 //导入面包屑组件
 import bread from '@/components/breadcrumb.vue'
 //导入api
-import { getUserRole } from '@/api/user.js'
+import { getUserRole, addRole } from '@/api/user.js'
 
 export default {
   name: 'roles',
   data() {
     return {
       //表格数据
-      tableData: [
-        {
-          id: '12987126',
-          name: '好滋好味鸡蛋仔',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }
-      ]
+      tableData: [],
+      //数据加载动画
+      loading: false,
+
+      //添加角色form数据
+      addForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      //弹窗是否显示
+      addUserDialogVisible: false,
+      //添加角色表格规则
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
+        ],
+        roleDesc: [
+          { required: false, message: '请输入角色描述信息', trigger: 'blur' },
+          { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'change' }
+        ]
+      }
     }
   },
   methods: {
     //数据加载
     async loadRoles() {
+      this.loading = true
       let res = await getUserRole()
       if (res.meta.status === 200) {
-        console.log(res)
+        // console.log(res)
         this.tableData = res.data
+        this.loading = false
       } else {
         this.$message.error(res.meta.msg)
       }
+    },
+    //提交角色信息
+    submitAddData(formName) {
+      this.$refs[formName].validate(async valid => {
+        if (valid) {
+          let res = await addRole(this.addForm)
+          if (res.meta.status === 201) {
+            this.$message.success('添加角色成功')
+            //关闭弹窗
+            this.addUserDialogVisible = false
+            //重新加载数据
+            this.loadRoles()
+          } else {
+            this.$message.error(res.meta.msg)
+          }
+        } else {
+          return false
+        }
+      })
     }
   },
   created() {
@@ -113,5 +183,15 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less" scoped>
+.firstMenu {
+  margin-bottom: 5px;
+  .secondMenu {
+    // margin-bottom: 5px;
+    .thirdMenu {
+      margin-bottom: 5px;
+      margin-right: 1px;
+    }
+  }
+}
 </style>

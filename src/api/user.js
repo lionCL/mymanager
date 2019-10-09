@@ -111,6 +111,18 @@ function getUserRole() {
   })
 }
 
+//添加用户角色
+function addRole({ roleName, roleDesc }) {
+  return request({
+    url: 'roles',
+    method: 'post',
+    data: {
+      roleName,
+      roleDesc: '' || roleDesc
+    }
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -123,5 +135,6 @@ export {
   updateUserInfo,
   getUserRole,
   assignRole,
-  getRoleInfo
+  getRoleInfo,
+  addRole
 }
