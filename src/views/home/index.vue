@@ -39,7 +39,7 @@
             <!-- 二级目录 -->
             <el-menu-item v-for="subItem in item.children"
                           :key="subItem.id"
-                          :index="'/'+ subItem.path">
+                          :index="'/home' +'/'+subItem.path">
               <i class="el-icon-menu"></i>
               <span>{{subItem.authName}}</span>
             </el-menu-item>

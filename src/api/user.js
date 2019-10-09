@@ -84,14 +84,6 @@ function updateUserInfo({ id, email, mobile }) {
   })
 }
 
-//用户角色列表
-function getUserRole() {
-  return request({
-    url: 'roles',
-    method: 'get'
-  })
-}
-
 //分配用户角色
 function assignRole(id, { rid }) {
   return request({
@@ -107,6 +99,14 @@ function assignRole(id, { rid }) {
 function getRoleInfo(roleId) {
   return request({
     url: `roles/${roleId}`,
+    method: 'get'
+  })
+}
+
+//用户角色列表
+function getUserRole() {
+  return request({
+    url: 'roles',
     method: 'get'
   })
 }
