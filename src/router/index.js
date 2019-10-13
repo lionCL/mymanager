@@ -13,6 +13,7 @@ const Login = () => import('@/views/login/index.vue')
 const Home = () => import('@/views/home/index.vue')
 const UserList = () => import('@/views/userlist/index.vue')
 const Roles = () => import('@/views/roles/index.vue')
+const Rights = () => import('@/views/rights/index.vue')
 
 //创建规则
 const routes = [
@@ -24,7 +25,8 @@ const routes = [
     name: 'home',
     children: [
       { path: 'users', component: UserList, name: 'userlist' },
-      { path: 'roles', component: Roles, name: 'roles' }
+      { path: 'roles', component: Roles, name: 'roles' },
+      { path: 'rights', component: Rights, name: 'rights' }
     ]
   }
 ]
