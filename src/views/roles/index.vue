@@ -24,7 +24,8 @@
                   :key="item1.id"
                   class="firstMenu">
             <el-col :span="4">
-              <el-tag closable>{{item1.authName}}</el-tag>
+              <el-tag closable
+                      @close="delRight(scope.row,item1.id)">{{item1.authName}}</el-tag>
               <i class="el-icon-arrow-right"></i>
             </el-col>
             <!-- 二级权限 -->
@@ -33,7 +34,8 @@
                       :key="item2.id"
                       class="secondMenu">
                 <el-col :span="4">
-                  <el-tag closable>{{item2.authName}}</el-tag>
+                  <el-tag closable
+                          @close="delRight(scope.row,item2.id)">{{item2.authName}}</el-tag>
                   <i class="el-icon-arrow-right"></i>
                 </el-col>
                 <!-- 三级权限 -->
@@ -41,7 +43,8 @@
                   <el-tag closable
                           v-for="item3 in item2.children"
                           :key="item3.id"
-                          class="thirdMenu">{{item3.authName}}</el-tag>
+                          class="thirdMenu"
+                          @close="delRight(scope.row,item3.id)">{{item3.authName}}</el-tag>
                 </el-col>
               </el-row>
             </el-col>
@@ -170,7 +173,8 @@ import {
   updateRoles,
   deleteRole,
   getAllRoles,
-  setRoles
+  setRoles,
+  delUserRole
 } from '@/api/user.js'
 
 export default {
@@ -388,6 +392,19 @@ export default {
         this.$message.success('角色权限分配成功')
         //刷新数据
         this.loadRoles()
+      }
+    },
+
+    //删除角色指定权限
+    async delRight(row, rightID) {
+      let res = await delUserRole(row.id, rightID)
+      if (res.meta.status === 200) {
+        // console.log(res)
+        this.$message.success('取消权限成功')
+        //row是一个数组是引用类型 直接修改渲染剩下的权限
+        row.children = res.data
+      } else {
+        this.$message.error(res.meta.msg)
       }
     }
   },

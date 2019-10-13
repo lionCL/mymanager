@@ -167,6 +167,14 @@ function setRoles(rid, rids) {
   })
 }
 
+//删除角色指定权限
+function delUserRole(roleId, rightId) {
+  return request({
+    url: `roles/${roleId}/rights/${rightId}`,
+    method: 'delete'
+  })
+}
+
 //暴露pai
 export {
   userLogin,
@@ -184,5 +192,6 @@ export {
   updateRoles,
   deleteRole,
   getAllRoles,
-  setRoles
+  setRoles,
+  delUserRole
 }
